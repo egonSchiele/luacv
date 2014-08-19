@@ -1,5 +1,8 @@
 #include "lua_highgui.h"
 
+#include <iostream>
+using namespace std;
+
 static int luacv_cvInitSystem(lua_State *L)
 {
   const char f_msg[]="int InitSystem(int argc, string[] argv)";
@@ -180,6 +183,32 @@ static int luacv_cvSaveImage(lua_State *L)
   lua_pushnumber(L,cvSaveImage(checkstring(L,1),checkCvArr(L,2),params));
   return 1;
 }
+
+static int
+luacv_cvGetBlob(lua_State *L)
+{
+    luaL_Buffer b;
+
+  const char f_msg[]="int GetBlob("CVARR_NAME" image)";
+  if (lua_gettop(L)!=1) luaL_error(L,f_msg);
+  // lua_pushnumber(L,cvSaveImage(checkstring(L,1),checkCvArr(L,2),params));
+
+   // cv::Mat **m = (cv::Mat **) lua_touserdata(L,1);
+   // if (m == NULL) {
+   //     return 0;
+   // }
+
+   cv::Mat m = cv::imread(checkstring(L,1));
+   cv::vector<uchar> buf;
+   cv::imencode(".png", m, buf);
+
+   luaL_buffinit(L, &b);
+   luaL_addlstring(&b, (const char*) &buf[0], buf.size());
+   cout << buf.size() << endl;
+   luaL_pushresult(&b);
+   return 1;
+}
+
 
 static int luacv_cvDecodeImage(lua_State *L)
 {
@@ -656,7 +685,7 @@ const luaL_Reg highgui[]=
 	funcReg(NamedWindow),       funcReg(ShowImage),         funcReg(MoveWindow),
 	funcReg(DestroyWindow),     funcReg(DestroyAllWindows), funcReg(GetWindowHandle),
 	funcReg(GetTrackbarPos),    funcReg(SetTrackbarPos),    funcReg(LoadImage),
-	funcReg(LoadImageM),        funcReg(SaveImage),         funcReg(DecodeImage),
+	funcReg(LoadImageM),        funcReg(SaveImage),         funcReg(DecodeImage), funcReg(GetBlob),
 	funcReg(DecodeImageM),      funcReg(ConvertImage),      funcReg(WaitKey),
 	funcReg(CreateFileCapture), funcReg(CreateCameraCapture),funcReg(GrabFrame),
 	funcReg(RetrieveFrame),     funcReg(QueryFrame),        funcReg(ReleaseCapture),
