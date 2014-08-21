@@ -256,6 +256,8 @@ CMakeFiles/luacv.dir/lua_highgui.cpp.o
  /usr/local/include/opencv2/contrib/retina.hpp
  /usr/local/include/opencv2/core/core.hpp
  /usr/local/include/opencv2/core/core_c.h
+ /usr/local/include/opencv2/core/cuda_devptrs.hpp
+ /usr/local/include/opencv2/core/gpumat.hpp
  /usr/local/include/opencv2/core/mat.hpp
  /usr/local/include/opencv2/core/operations.hpp
  /usr/local/include/opencv2/core/types_c.h
@@ -264,6 +266,7 @@ CMakeFiles/luacv.dir/lua_highgui.cpp.o
  /usr/local/include/opencv2/flann/config.h
  /usr/local/include/opencv2/flann/defines.h
  /usr/local/include/opencv2/flann/miniflann.hpp
+ /usr/local/include/opencv2/gpu/gpu.hpp
  /usr/local/include/opencv2/highgui/highgui.hpp
  /usr/local/include/opencv2/highgui/highgui_c.h
  /usr/local/include/opencv2/imgproc/imgproc.hpp

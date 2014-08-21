@@ -107,6 +107,8 @@ lua_highgui.h
 /home/adit/luacv/src/lua_highgui.h
 iostream
 -
+opencv2/gpu/gpu.hpp
+/home/adit/luacv/src/opencv2/gpu/gpu.hpp
 
 /home/adit/luacv/src/lua_highgui.h
 opencv2/opencv.hpp
@@ -208,6 +210,14 @@ opencv2/core/mat.hpp
 opencv2/core/types_c.h
 /usr/local/include/opencv2/core/opencv2/core/types_c.h
 
+/usr/local/include/opencv2/core/cuda_devptrs.hpp
+
+/usr/local/include/opencv2/core/gpumat.hpp
+opencv2/core/core.hpp
+/usr/local/include/opencv2/core/opencv2/core/core.hpp
+opencv2/core/cuda_devptrs.hpp
+/usr/local/include/opencv2/core/opencv2/core/cuda_devptrs.hpp
+
 /usr/local/include/opencv2/core/mat.hpp
 limits.h
 -
@@ -275,6 +285,22 @@ opencv2/core/core.hpp
 /usr/local/include/opencv2/flann/opencv2/core/core.hpp
 opencv2/flann/defines.h
 /usr/local/include/opencv2/flann/opencv2/flann/defines.h
+
+/usr/local/include/opencv2/gpu/gpu.hpp
+vector
+-
+memory
+-
+iosfwd
+-
+opencv2/core/gpumat.hpp
+/usr/local/include/opencv2/gpu/opencv2/core/gpumat.hpp
+opencv2/imgproc/imgproc.hpp
+/usr/local/include/opencv2/gpu/opencv2/imgproc/imgproc.hpp
+opencv2/objdetect/objdetect.hpp
+/usr/local/include/opencv2/gpu/opencv2/objdetect/objdetect.hpp
+opencv2/features2d/features2d.hpp
+/usr/local/include/opencv2/gpu/opencv2/features2d/features2d.hpp
 
 /usr/local/include/opencv2/highgui/highgui.hpp
 opencv2/core/core.hpp

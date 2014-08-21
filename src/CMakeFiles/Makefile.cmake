@@ -24,6 +24,7 @@ SET(CMAKE_MAKEFILE_DEPENDS
   "/usr/share/cmake28/Modules/Compiler/GNU-C.cmake"
   "/usr/share/cmake28/Modules/Compiler/GNU-CXX.cmake"
   "/usr/share/cmake28/Modules/Compiler/GNU.cmake"
+  "/usr/share/cmake28/Modules/FindCUDA.cmake"
   "/usr/share/cmake28/Modules/FindLua51.cmake"
   "/usr/share/cmake28/Modules/FindPackageHandleStandardArgs.cmake"
   "/usr/share/cmake28/Modules/FindPackageMessage.cmake"

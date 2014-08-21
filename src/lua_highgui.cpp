@@ -1,6 +1,8 @@
 #include "lua_highgui.h"
 
 #include <iostream>
+#include "opencv2/gpu/gpu.hpp"
+
 using namespace std;
 
 static int luacv_cvInitSystem(lua_State *L)
@@ -186,7 +188,7 @@ static int luacv_cvSaveImage(lua_State *L)
 
 static int luacv_cvGetCudaEnabledDeviceCount(lua_State *L)
 {
-  lua_pushnumber(L,gpu::getCudaEnabledDeviceCount());
+  lua_pushnumber(L,cv::gpu::getCudaEnabledDeviceCount());
   return 1;
 }
 
@@ -225,12 +227,12 @@ luacv_cvGpuGetBlob(lua_State *L)
    // IplImage* img = cvLoadImage(checkstring(L,1), iscolor);
    cv::Mat dst_(width,height, CV_8UC3, cv::Scalar(0,0,255));
 
-   cv::GpuMat src(src_);
-   cv::GpuMat dst(dst_);
+   cv::gpu::GpuMat src(src_);
+   cv::gpu::GpuMat dst(dst_);
 
-   gpu::resize(src, dst, Size(width, height), 0, 0, inter);
+   cv::gpu::resize(src, dst, cv::Size(width, height), 0, 0, inter);
    
-   cv::imencode(".png", u, buf);
+   cv::imencode(".png", src_, buf);
 
    luaL_buffinit(L, &b);
    luaL_addlstring(&b, (const char*) &buf[0], buf.size());
