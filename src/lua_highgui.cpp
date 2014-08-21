@@ -189,8 +189,18 @@ luacv_cvGetBlob(lua_State *L)
 {
     luaL_Buffer b;
 
-  const char f_msg[]="int GetBlob("CVARR_NAME" image)";
-  if (lua_gettop(L)!=1) luaL_error(L,f_msg);
+  const char f_msg[]="int GetBlob(string path, int width, int height, int interpolation=CV_INTER_LINEAR)";
+  int inter=CV_INTER_LINEAR;
+  switch(lua_gettop(L))
+  {
+    case 3:
+            break;
+    case 4:
+            inter=checkint(L,4);
+            break;
+    default:
+            luaL_error(L,f_msg);
+  }
   // lua_pushnumber(L,cvSaveImage(checkstring(L,1),checkCvArr(L,2),params));
 
    // cv::Mat **m = (cv::Mat **) lua_touserdata(L,1);
@@ -198,9 +208,19 @@ luacv_cvGetBlob(lua_State *L)
    //     return 0;
    // }
 
-   cv::Mat m = cv::imread(checkstring(L,1));
+   int width = checkint(L,2);
+   int height = checkint(L,3);
+
+   const cv::Mat m = cv::imread(checkstring(L,1));
+   //int iscolor=CV_LOAD_IMAGE_COLOR;
+   //const cv::Mat m = cvLoadImageM(checkstring(L,1),iscolor);
    cv::vector<uchar> buf;
-   cv::imencode(".png", m, buf);
+
+   // IplImage* img = cvLoadImage(checkstring(L,1), iscolor);
+
+   cv::Mat u(width,height, CV_8UC3, cv::Scalar(0,0,255));
+   resize(m,u,cv::Size(width, height),0,0, inter);
+   cv::imencode(".png", u, buf);
 
    luaL_buffinit(L, &b);
    luaL_addlstring(&b, (const char*) &buf[0], buf.size());
