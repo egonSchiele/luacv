@@ -184,6 +184,61 @@ static int luacv_cvSaveImage(lua_State *L)
   return 1;
 }
 
+static int luacv_cvGetCudaEnabledDeviceCount(lua_State *L)
+{
+  lua_pushnumber(L,gpu::getCudaEnabledDeviceCount());
+  return 1;
+}
+
+static int
+luacv_cvGpuGetBlob(lua_State *L)
+{
+    luaL_Buffer b;
+
+  const char f_msg[]="int GpuGetBlob(string path, int width, int height, int interpolation=CV_INTER_LINEAR)";
+  int inter=CV_INTER_LINEAR;
+  switch(lua_gettop(L))
+  {
+    case 3:
+            break;
+    case 4:
+            inter=checkint(L,4);
+            break;
+    default:
+            luaL_error(L,f_msg);
+  }
+  // lua_pushnumber(L,cvSaveImage(checkstring(L,1),checkCvArr(L,2),params));
+
+   // cv::Mat **m = (cv::Mat **) lua_touserdata(L,1);
+   // if (m == NULL) {
+   //     return 0;
+   // }
+
+   int width = checkint(L,2);
+   int height = checkint(L,3);
+
+   const cv::Mat src_ = cv::imread(checkstring(L,1));
+   //int iscolor=CV_LOAD_IMAGE_COLOR;
+   //const cv::Mat m = cvLoadImageM(checkstring(L,1),iscolor);
+   cv::vector<uchar> buf;
+
+   // IplImage* img = cvLoadImage(checkstring(L,1), iscolor);
+   cv::Mat dst_(width,height, CV_8UC3, cv::Scalar(0,0,255));
+
+   cv::GpuMat src(src_);
+   cv::GpuMat dst(dst_);
+
+   gpu::resize(src, dst, Size(width, height), 0, 0, inter);
+   
+   cv::imencode(".png", u, buf);
+
+   luaL_buffinit(L, &b);
+   luaL_addlstring(&b, (const char*) &buf[0], buf.size());
+   cout << buf.size() << endl;
+   luaL_pushresult(&b);
+   return 1;
+}
+
 static int
 luacv_cvGetBlob(lua_State *L)
 {
@@ -705,7 +760,8 @@ const luaL_Reg highgui[]=
 	funcReg(NamedWindow),       funcReg(ShowImage),         funcReg(MoveWindow),
 	funcReg(DestroyWindow),     funcReg(DestroyAllWindows), funcReg(GetWindowHandle),
 	funcReg(GetTrackbarPos),    funcReg(SetTrackbarPos),    funcReg(LoadImage),
-	funcReg(LoadImageM),        funcReg(SaveImage),         funcReg(DecodeImage), funcReg(GetBlob),
+	funcReg(LoadImageM),        funcReg(SaveImage),         funcReg(DecodeImage), funcReg(GetBlob), funcReg(GpuGetBlob),
+  funcReg(GetCudaEnabledDeviceCount),
 	funcReg(DecodeImageM),      funcReg(ConvertImage),      funcReg(WaitKey),
 	funcReg(CreateFileCapture), funcReg(CreateCameraCapture),funcReg(GrabFrame),
 	funcReg(RetrieveFrame),     funcReg(QueryFrame),        funcReg(ReleaseCapture),
