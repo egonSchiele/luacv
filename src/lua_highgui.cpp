@@ -289,6 +289,68 @@ luacv_cvGetBlob(lua_State *L)
 }
 
 
+static int
+luacv_cvScaleData(lua_State *L)
+{
+    luaL_Buffer b;
+
+  const char f_msg[]="int ScaleData(string data, int data_length, int width, int height, int interpolation=CV_INTER_LINEAR)";
+  int inter=CV_INTER_LINEAR;
+  switch(lua_gettop(L))
+  {
+    case 4:
+            break;
+    case 5:
+            inter=checkint(L,4);
+            break;
+    default:
+            luaL_error(L,f_msg);
+  }
+  // lua_pushnumber(L,cvSaveImage(checkstring(L,1),checkCvArr(L,2),params));
+
+   // cv::Mat **m = (cv::Mat **) lua_touserdata(L,1);
+   // if (m == NULL) {
+   //     return 0;
+   // }
+
+   int data_length = checkint(L,2);
+   int width = checkint(L,3);
+   int height = checkint(L,4);
+   // check the type of a passed-in value like this:
+   // cout << "type: " << lua_type(L,1) << endl;
+   const char *contents = checkstring(L,1);
+   std::vector<char> data;
+   for (int i=0; i < data_length; i++) {
+     data.push_back(contents[i]);
+   }
+   // std::vector<char> * data = (std::vector<char> *) lua_touserdata(L,1);
+   // std::string cppContents(contents, data_length);
+   // cout << cppContents << endl;
+
+   cv::Mat m = cv::imdecode(data, CV_LOAD_IMAGE_COLOR);
+
+   // cv::Mat m(816, 650, CV_8UC3, lua_touserdata(L,1), cv::Mat::AUTO_STEP);
+
+   // const cv::Mat m = cv::imread(checkstring(L,1));
+   //int iscolor=CV_LOAD_IMAGE_COLOR;
+   //const cv::Mat m = cvLoadImageM(checkstring(L,1),iscolor);
+   cv::vector<uchar> buf;
+
+   // IplImage* img = cvLoadImage(checkstring(L,1), iscolor);
+
+   cv::Mat u(width,height, CV_8UC3, cv::Scalar(0,0,255));
+   resize(m,u,cv::Size(width, height),0,0, inter);
+   cv::imencode(".png", u, buf);
+
+   luaL_buffinit(L, &b);
+   luaL_addlstring(&b, (const char*) &buf[0], buf.size());
+   cout << buf.size() << endl;
+   luaL_pushresult(&b);
+   return 1;
+}
+
+
+
 static int luacv_cvDecodeImage(lua_State *L)
 {
   const char f_msg[]=IPLIMAGE_NAME" DecodeImage("CVMAT_NAME" buf, int iscolor=CV_LOAD_IMAGE_COLOR)";
@@ -765,7 +827,7 @@ const luaL_Reg highgui[]=
 	funcReg(DestroyWindow),     funcReg(DestroyAllWindows), funcReg(GetWindowHandle),
 	funcReg(GetTrackbarPos),    funcReg(SetTrackbarPos),    funcReg(LoadImage),
 	funcReg(LoadImageM),        funcReg(SaveImage),         funcReg(DecodeImage), funcReg(GetBlob), funcReg(GpuGetBlob),
-  funcReg(GetCudaEnabledDeviceCount),
+  funcReg(GetCudaEnabledDeviceCount), funcReg(ScaleData),
 	funcReg(DecodeImageM),      funcReg(ConvertImage),      funcReg(WaitKey),
 	funcReg(CreateFileCapture), funcReg(CreateCameraCapture),funcReg(GrabFrame),
 	funcReg(RetrieveFrame),     funcReg(QueryFrame),        funcReg(ReleaseCapture),

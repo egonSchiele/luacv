@@ -86,6 +86,9 @@ clean:
 clean/fast: clean
 .PHONY : clean/fast
 
+copy:
+	cp luacv.so.0.2.0 /opt/luajit/lib/lua/5.1/luacv.so
+
 # Prepare targets for installation.
 preinstall: all
 	$(MAKE) -f CMakeFiles/Makefile2 preinstall
