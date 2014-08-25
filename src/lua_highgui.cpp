@@ -231,8 +231,10 @@ luacv_cvGpuGetBlob(lua_State *L)
    cv::gpu::GpuMat dst(dst_);
 
    cv::gpu::resize(src, dst, cv::Size(width, height), 0, 0, inter);
+
+   cv::Mat final(dst);
    
-   cv::imencode(".png", src_, buf);
+   cv::imencode(".png", final, buf);
 
    luaL_buffinit(L, &b);
    luaL_addlstring(&b, (const char*) &buf[0], buf.size());
