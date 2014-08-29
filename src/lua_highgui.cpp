@@ -294,36 +294,25 @@ luacv_cvScaleData(lua_State *L)
 {
     luaL_Buffer b;
 
-  const char f_msg[]="int ScaleData(string data, int data_length, int width, int height, int interpolation=CV_INTER_LINEAR, int compression=3)";
-  int inter=CV_INTER_LINEAR;
-  int compression=3;
+  const char f_msg[]="int ScaleData(string data, int data_length, int width, int height, int interpolation, string extension, int png_compression, int jpeg_compression)";
   switch(lua_gettop(L))
   {
-    case 4:
-            break;
-    case 5:
-            inter=checkint(L,5);
-            break;
-    case 6:
-            inter=checkint(L,5);
-            compression=checkint(L,6);
+    case 8:
             break;
     default:
             luaL_error(L,f_msg);
   }
-  // lua_pushnumber(L,cvSaveImage(checkstring(L,1),checkCvArr(L,2),params));
 
-   // cv::Mat **m = (cv::Mat **) lua_touserdata(L,1);
-   // if (m == NULL) {
-   //     return 0;
-   // }
-
+   const char *contents = checkstring(L,1);
    int data_length = checkint(L,2);
    int width = checkint(L,3);
    int height = checkint(L,4);
+   int inter = checkint(L,5);
+   const char *extension = checkstring(L,6);
+   int png_compression = checkint(L,7);
+   int jpeg_compression = checkint(L,8);
    // check the type of a passed-in value like this:
    // cout << "type: " << lua_type(L,1) << endl;
-   const char *contents = checkstring(L,1);
    std::vector<char> data(data_length);
    for (int i=0; i < data_length; i++) {
      data[i] = contents[i];
@@ -344,13 +333,13 @@ luacv_cvScaleData(lua_State *L)
    // IplImage* img = cvLoadImage(checkstring(L,1), iscolor);
 
    cv::vector<int> params;
-   // params.push_back(CV_IMWRITE_PNG_COMPRESSION);
-   // params.push_back(compression);
+   params.push_back(CV_IMWRITE_PNG_COMPRESSION);
+   params.push_back(png_compression);
    params.push_back(CV_IMWRITE_JPEG_QUALITY);
-   params.push_back(compression);
+   params.push_back(jpeg_compression);
    cv::Mat u(width,height, CV_8UC3, cv::Scalar(0,0,255));
    resize(m,u,cv::Size(width, height),0,0, inter);
-   cv::imencode(".jpg", u, buf, params);
+   cv::imencode(extension, u, buf, params);
 
    luaL_buffinit(L, &b);
    luaL_addlstring(&b, (const char*) &buf[0], buf.size());
