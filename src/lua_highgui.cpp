@@ -290,12 +290,62 @@ luacv_cvGetBlob(lua_State *L)
 }
 
 
+void overlayImage(const cv::Mat &background, const cv::Mat &foreground, 
+  cv::Mat &output, cv::Point2i location)
+{
+  background.copyTo(output);
+
+
+  // start at the row indicated by location, or at row 0 if location.y is negative.
+  for(int y = std::max(location.y , 0); y < background.rows; ++y)
+  {
+    int fY = y - location.y; // because of the translation
+
+    // we are done of we have processed all rows of the foreground image.
+    if(fY >= foreground.rows)
+      break;
+
+    // start at the column indicated by location, 
+
+    // or at column 0 if location.x is negative.
+    for(int x = std::max(location.x, 0); x < background.cols; ++x)
+    {
+      int fX = x - location.x; // because of the translation.
+
+      // we are done with this row if the column is outside of the foreground image.
+      if(fX >= foreground.cols)
+        break;
+
+      // determine the opacity of the foregrond pixel, using its fourth (alpha) channel.
+      double opacity =
+        ((double)foreground.data[fY * foreground.step + fX * foreground.channels() + 3])
+
+        / 255.;
+
+
+      // and now combine the background and foreground pixel, using the opacity, 
+
+      // but only if opacity > 0.
+      for(int c = 0; opacity > 0 && c < output.channels(); ++c)
+      {
+        unsigned char foregroundPx =
+          foreground.data[fY * foreground.step + fX * foreground.channels() + c];
+        unsigned char backgroundPx =
+          background.data[y * background.step + x * background.channels() + c];
+        output.data[y*output.step + output.channels()*x + c] =
+          backgroundPx * (1.-opacity) + foregroundPx * opacity;
+      }
+    }
+  }
+}
+
+
 static int luacv_cvMergeImages(lua_State *L)
 {
-  const char f_msg[]="int MergeImages(string file1, string file2, string outfile)";
+  const char f_msg[]="int MergeImages(string file1, string file2)";
   switch(lua_gettop(L))
   {
-    case 3:
+    case 2:
       break;
     default:
       luaL_error(L,f_msg);
@@ -303,24 +353,25 @@ static int luacv_cvMergeImages(lua_State *L)
 
   const char *file1 = checkstring(L,1);
   const char *file2 = checkstring(L,2);
-  const char *outfile = checkstring(L,3);
 
-  Mat img1 = imread(file1, CV_LOAD_IMAGE_COLOR);
-  Mat dst(img1);
-  Mat img2 = imread(file2, CV_LOAD_IMAGE_COLOR);
+  Mat background = imread(file1);
+  Mat foreground = imread(file2, -1);
+  Mat result;
 
-  for(int y=0;y<img1.rows;y++)
-    for(int x=0;x<img1.cols;x++)
-    {
-      int alpha = img2.at<Vec4b>(y,x)[3];
-      // int alpha = 256 * (x+y)/(img1.rows+img1.cols);
-      dst.at<Vec3b>(y,x)[0] = (1-alpha/256.0) * img.at<Vec3b>(y,x)[0] + (alpha * img2.at<Vec3b>(y,x)[0] / 256);
-      dst.at<Vec3b>(y,x)[1] = (1-alpha/256.0) * img.at<Vec3b>(y,x)[1] + (alpha * img2.at<Vec3b>(y,x)[1] / 256);
-      dst.at<Vec3b>(y,x)[2] = (1-alpha/256.0) * img.at<Vec3b>(y,x)[2] + (alpha * img2.at<Vec3b>(y,x)[2] / 256);
-    }
+  overlayImage(background, foreground, result, cv::Point(0,0));
 
-  imwrite(outfile,dst);
+  // C: void cvAddWeighted(const CvArr* src1, double alpha, const CvArr* src2, double beta, double gamma, CvArr* dst)
+  // addWeighted(img1, 0.5, img2, 0.5, 0.0, dst);
 
+
+  luaL_Buffer b;
+  cv::vector<uchar> buf;
+  cv::imencode(".png", result, buf);
+
+  luaL_buffinit(L, &b);
+  luaL_addlstring(&b, (const char*) &buf[0], buf.size());
+  luaL_pushresult(&b);
+  return 1;
 }
 
   static int
@@ -860,7 +911,7 @@ const luaL_Reg highgui[]=
   funcReg(DestroyWindow),     funcReg(DestroyAllWindows), funcReg(GetWindowHandle),
   funcReg(GetTrackbarPos),    funcReg(SetTrackbarPos),    funcReg(LoadImage),
   funcReg(LoadImageM),        funcReg(SaveImage),         funcReg(DecodeImage), funcReg(GetBlob), funcReg(GpuGetBlob),
-  funcReg(GetCudaEnabledDeviceCount), funcReg(ScaleData),
+  funcReg(GetCudaEnabledDeviceCount), funcReg(ScaleData), funcReg(MergeImages),
   funcReg(DecodeImageM),      funcReg(ConvertImage),      funcReg(WaitKey),
   funcReg(CreateFileCapture), funcReg(CreateCameraCapture),funcReg(GrabFrame),
   funcReg(RetrieveFrame),     funcReg(QueryFrame),        funcReg(ReleaseCapture),
