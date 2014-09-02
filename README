@@ -1,3 +1,11 @@
+luacv
+=====
+
+This is our internal fork of LuaCV: http://sourceforge.net/projects/luacv/
+
+This is what we use to scale images etc.
+
+
 README for LuaCV
 ================
 
